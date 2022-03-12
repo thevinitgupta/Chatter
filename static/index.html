@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chatter</title>
+    <!-- <link rel="stylesheet" href="./style.css"> -->
+    <style>
+      body { 
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh; 
+        box-sizing: border-box;
+        padding-bottom: 3rem;
+        overflow: none;
+        display: flex;
+        justify-content: center; 
+        align-items: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      }
+      .chatBox{
+          width: 100%;
+          height: 100%;
+          max-width: 500px;
+          max-height: 570px;
+          overflow: none;
+          border: 2px solid #3ed234;
+          border-radius: 2px;
+          display: flex;
+          flex-direction: column;
+          justify-content: start;
+          position: relative;
+      }
+      /* .chatBox::-webkit-scrollbar{
+        display: none;
+      } */
+      #form { 
+          background: rgba(120, 194, 118, 0.246); 
+          padding: 0.25rem; 
+          height: 5%;
+          box-sizing: border-box;
+          position: absolute; 
+          bottom: 0; 
+          left: 0; 
+          right: 0; 
+          display: flex; 
+          height: 3rem; 
+          box-sizing: border-box; 
+          backdrop-filter: blur(10px); 
+      }
+      #input { 
+          border: none; 
+          padding: 0 1rem; 
+          flex-grow: 1; 
+          border-radius: 2rem; 
+          margin: 0.25rem; 
+      }
+      #input:focus { 
+          outline: none; 
+      }
+      #form > button { 
+          background: rgb(25, 114, 9); 
+          border: none; 
+          font-size: 16px;
+          padding: 0 1rem; 
+          margin: 0.25rem; 
+          border-radius: 3px; 
+          outline: none; 
+          color: #fff; 
+      }
+      #form > button:hover{
+        cursor: pointer;
+      }
+      #messages { 
+        width: 100%;
+        height: 93%;
+        margin: 0; 
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        flex-wrap: nowrap;
+        overflow-y: scroll;
+        scroll-behavior: smooth;
+        overflow-x: hidden;
+      }
+      #message::-webkit-scrollbar{
+        display: none;
+      }
+      #messages > div { 
+        width: 97%;
+        padding: 0.5rem 1rem; 
+      }
+      #messages > div:nth-child(odd) { 
+          background-color: #9fe79f; 
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chatBox">
+      <form id="form" action="">
+        <input id="input" autocomplete="off" /><button>Send</button>
+      </form>
+      <div id="messages"></div>
+      
+    </div>
+  </body>
+  <script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io();
+
+  let form = document.querySelector('#form');
+  let input = document.querySelector('#input');
+  let messages = document.querySelector("#messages");
+
+  const name = prompt("Enter your name : ");
+  appendMessage('You joined')
+  socket.emit('new-user', name);
+
+  form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      appendMessage(`You :${input.value}`);
+      socket.emit('new-message',input.value);
+      input.value = ""
+  })
+
+  socket.on('display-message',(response)=>{
+    const {message, name} = response;
+      appendMessage(`${name} : ${message}`);
+  })
+
+  socket.on('user-joined', (message)=>{
+    appendMessage(message+" connected");
+  })
+
+  function appendMessage(message){
+    let div = document.createElement('div');
+    div.appendChild(document.createTextNode(message));
+    messages.appendChild(div);
+  }
+</script>
+</html>
